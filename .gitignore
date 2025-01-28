@@ -36,6 +36,7 @@ ExportedObj/
 *.unityproj
 *.sln
 *.idea
+*.vscode
 *.suo
 *.tmp
 *.user
