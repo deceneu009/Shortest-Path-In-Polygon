@@ -298,7 +298,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 752cbee3628c11d44a6b10d69822ec55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tex: {fileID: 10305, guid: 0000000000000000f000000000000000, type: 0}
+  tex: {fileID: 10910, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!4 &1263983144
 Transform:
   m_ObjectHideFlags: 0
