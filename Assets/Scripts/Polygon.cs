@@ -16,7 +16,9 @@ public class Polygon : MonoBehaviour
     private bool _polygonScanned; //this is for checking if the polygon is simple??? I need to check again
     private bool _polygonSimple;
     private bool _startPointSet;
+    private bool _startPointSetting;
     private bool _endPointSet;
+    private bool _endPointSetting;
     private bool _shortestPathSet;
 
     // Squares
@@ -95,8 +97,23 @@ public class Polygon : MonoBehaviour
         // Add a SpriteRenderer and assign the sprite in order to display the square(which is the node)
         SpriteRenderer spriteRenderer = _square.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = _mySprite;
-        spriteRenderer.sortingOrder = 0;
-        spriteRenderer.sortingLayerName = "Default";
+        spriteRenderer.sortingOrder = 100;
+        spriteRenderer.sortingLayerName = "AboveEverything";
+
+        if (_startPointSetting == true)
+        {
+            _startPointSetting = false;
+            spriteRenderer.color = Color.black;
+        }
+        else if (_endPointSetting == true)
+        {
+            _endPointSetting = false;
+            spriteRenderer.color = Color.black;
+        }
+        else
+        {
+            spriteRenderer.color = Color.white;
+        }
 
         // Position the square
         _square.transform.position = _mousePosition;
@@ -1028,7 +1045,7 @@ public class Polygon : MonoBehaviour
             }
 
             Debug.Log("Start point was set!");
-
+            _startPointSetting = true;
             CreateSquare();
             _start = _square;
 
@@ -1067,6 +1084,8 @@ public class Polygon : MonoBehaviour
                 return;
             }
 
+            Debug.Log("Start point was set!");
+            _endPointSetting = true;
             CreateSquare();
             _end = _square;
 
@@ -1076,33 +1095,33 @@ public class Polygon : MonoBehaviour
         }
 
         // Deleting the Points
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            if (_endPointSet)
-            {
-                Destroy(_end);
+        //if (Input.GetKeyDown(KeyCode.R))
+        //{
+        //    if (_endPointSet)
+        //    {
+        //        Destroy(_end);
 
-                Debug.Log("End point removed");
-                _squaresPos.RemoveAt(_squaresPos.Count - 1);
+        //        Debug.Log("End point removed");
+        //        _squaresPos.RemoveAt(_squaresPos.Count - 1);
 
-                _endPointSet = false;
-            }
+        //        _endPointSet = false;
+        //    }
 
-            if (_startPointSet)
-            {
-                Destroy(_start);
+        //    if (_startPointSet)
+        //    {
+        //        Destroy(_start);
 
-                Debug.Log("Start point removed");
-                _squaresPos.RemoveAt(_squaresPos.Count - 1);
+        //        Debug.Log("Start point removed");
+        //        _squaresPos.RemoveAt(_squaresPos.Count - 1);
 
-                _startPointSet = false;
-            }
+        //        _startPointSet = false;
+        //    }
 
-            UndoTriangulation();
-            //UndoDijkstra();
+        //    UndoTriangulation();
+        //    //UndoDijkstra();
 
-            Debug.LogError("There are no start or end points!");
-        }
+        //    Debug.LogError("There are no start or end points!");
+        //}
 
         // Starting the triangulation
         if (Input.GetKeyDown(KeyCode.T))
