@@ -13,7 +13,7 @@ public class Polygon : MonoBehaviour
     // Checkers
     private bool _polygonClosed;
     private bool _polygonTriangulated;
-    private bool _polygonScanned; //this is for checking if the polygon is simple
+    private bool _polygonScanned; //this is for checking if the polygon is simple??? I need to check again
     private bool _polygonSimple;
     private bool _startPointSet;
     private bool _endPointSet;
@@ -26,7 +26,7 @@ public class Polygon : MonoBehaviour
 
     // Square List
     private List<GameObject> _squareList = new List<GameObject>();
-    private List<Vector3> _squaresPos = new List<Vector3>(); // the points themselves
+    private List<Vector3> _squaresPos = new List<Vector3>(); // the points locations
 
     // Edges
     private List<(Vector3, Vector3)> _edges = new List<(Vector3, Vector3)>();
@@ -365,16 +365,24 @@ public class Polygon : MonoBehaviour
             return;
         }
 
+        Debug.Log($"Triangulation line count before deletion: {_triangulationLineRenderers.Count}");
+
         foreach (LineRenderer triangulatedLine in _triangulationLineRenderers)
         {
-            Destroy(triangulatedLine);
+            if (triangulatedLine != null)
+            {
+                Destroy(triangulatedLine.gameObject); // Destroy the whole GameObject
+            }
         }
 
+        // Ensure the list is cleared after destroying
         _triangulationLineRenderers.Clear();
+
         Debug.Log("Triangulation undone successfully!");
         _polygonTriangulated = false;
+        _triangles.Clear();
+        // Optional: Check if there are remaining line renderers in the scene
     }
-
     private void PerformDelaunayTriangulation()
     {
         if (!_polygonClosed || _polygonTriangulated)
@@ -886,44 +894,47 @@ public class Polygon : MonoBehaviour
                 return;
             }
 
-            if (_polygonClosed)
+            if (_shortestPathSet)
             {
-                UndoClosedPolygon();
-                Debug.Log("Polygon opened!");
-                _polygonScanned = false;
+                UndoDijkstra();
+                Debug.Log("Path lines after deletion: {_shortestPathLineRenderers.Count}");
                 return;
             }
 
             if (_polygonTriangulated)
             {
                 UndoTriangulation();
+                _polygonTriangulated = false;
+                Debug.Log("Triangulation line count before deletion: {_triangulationLineRenderers.Count}");
                 return;
-            }
-
-            if (_shortestPathSet)
-            {
-                foreach (var lineRenderer in _shortestPathLineRenderers)
-                {
-                    Destroy(lineRenderer);
-                }
-                
-                _triangulationLineRenderers.Clear();
-                _shortestPathSet = false;
-            }
-
-            if (_startPointSet)
-            {
-                _startPointSet = false;
-                Destroy(_start);
             }
 
             if (_endPointSet)
             {
                 _endPointSet = false;
+                _squaresPos.RemoveAt(_squareList.Count - 1);
                 Destroy(_end);
                 return;
             }
-            
+
+            if (_startPointSet)
+            {
+                _startPointSet = false;
+                _squaresPos.RemoveAt(_squareList.Count - 1);
+                Destroy(_start);
+                return;
+            }
+
+            if (_polygonClosed)
+            {
+                UndoClosedPolygon();
+                Debug.Log("Polygon opened!");
+                Debug.Log($"_squaresPos count after clear: {_squaresPos.Count}");
+                Debug.Log($"_triangles count after clear: {_triangles.Count}");
+                _polygonScanned = false;
+                return;
+            }
+
             Debug.Log("Pressed right-click!");
 
             // Get the last square in the list
@@ -936,14 +947,6 @@ public class Polygon : MonoBehaviour
             // Also remove its position from the list
             _squaresPos.RemoveAt(_squaresPos.Count - 1);
 
-            if (!_polygonTriangulated)
-            {
-                if (_triangles.IsUnityNull())
-                {
-                    _triangles.Clear();
-                }
-                
-            }
             // Remove and destroy the last line (the GameObject containing the LineRenderer)
             if (_polygonLineRenderers.Count > 0)
             {
@@ -953,6 +956,9 @@ public class Polygon : MonoBehaviour
                 // Destroy the GameObject, not just the LineRenderer component
                 Destroy(lineRenderer.gameObject);
             }
+
+            Debug.Log($"_squaresPos count after clear: {_squaresPos.Count}");
+            Debug.Log($"_triangles count after clear: {_triangles.Count}");
         }
 
         // Mid-click
